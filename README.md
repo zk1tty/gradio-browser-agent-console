@@ -1,5 +1,5 @@
 ---
-tags: [gradio-custom-component, SimpleTextbox, browser, Chrome, extension, polling, queuing, daemon, logging, extension, Chrome, browser-agent, polling, queuing, logging, stream]
+tags: [gradio-custom-component, SimpleTextbox, browser, Chrome, extension, polling, queuing, daemon, logging]
 title: gradio_gradio-browser-agent-console
 short_description: the starter package for 99% browser-agent demos
 colorFrom: blue
