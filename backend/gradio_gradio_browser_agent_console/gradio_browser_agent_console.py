@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from gradio.components import Timer
 
 
-class gradio-browser-agent-console(FormComponent):
+class gradio_browser_agent_console(FormComponent):
     """
     Creates a very simple textbox for user to enter string input or display string output.
     """
