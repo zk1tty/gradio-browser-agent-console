@@ -2,11 +2,11 @@
 
 <script lang="ts">
 	import type { Gradio } from "@gradio/utils";
-	import { BlockTitle } from "@gradio/atoms";
-	import { Block } from "@gradio/atoms";
+	import { Block, BlockTitle } from "@gradio/atoms";
+	import { BaseButton } from "@gradio/button";
 	import { StatusTracker } from "@gradio/statustracker";
 	import type { LoadingStatus } from "@gradio/statustracker";
-	import { tick } from "svelte";
+	import { createEventDispatcher, onMount, tick } from "svelte";
 
 	export let gradio: Gradio<{
 		change: never;
@@ -32,6 +32,18 @@
 	let el: HTMLTextAreaElement | HTMLInputElement;
 	const container = true;
 
+	// ADDED
+	const dispatch = createEventDispatcher();
+	// expose functions to Python ↔︎ frontend bridge
+	onMount(() => {
+		// focus log textarea at start
+		(document.getElementById("log") as HTMLTextAreaElement)?.scrollTo(0, 1e6);
+	});
+
+	function send(cmd: string) {
+		dispatch("change", { event: cmd });   // goes to .preprocess()
+	}
+
 	function handle_change(): void {
 		gradio.dispatch("change");
 		if (!value_is_output) {
@@ -51,43 +63,25 @@
 
 	// When the value changes, dispatch the change event via handle_change()
 	// See the docs for an explanation: https://svelte.dev/docs/svelte-components#script-3-$-marks-a-statement-as-reactive
-	$: value, handle_change();
+	$: value, handle_change(), send("start");
 </script>
 
-<Block
-	{visible}
-	{elem_id}
-	{elem_classes}
-	{scale}
-	{min_width}
-	allow_overflow={false}
-	padding={true}
->
-	{#if loading_status}
-		<StatusTracker
-			autoscroll={gradio.autoscroll}
-			i18n={gradio.i18n}
-			{...loading_status}
-			on:clear_status={() => gradio.dispatch("clear_status", loading_status)}
+<div>
+	<!--- ADDED -->
+	<div class="flex flex-col gap-2 h-full w-full">
+		<div class="flex gap-2">
+		  <BaseButton variant="primary"   on:click={() => fire("start")}>Start</BaseButton>
+		  <BaseButton variant="negative"  on:click={() => fire("stop")}>Stop</BaseButton>
+		  <BaseButton variant="secondary" on:click={() => fire("replay")}>Replay</BaseButton>
+		</div>
+	  
+		<textarea
+		  bind:value
+		  readonly
+		  class="flex-1 bg-black text-green-300 p-2 font-mono text-xs overflow-y-scroll"
 		/>
-	{/if}
-
-	<label class:container>
-		<BlockTitle {root} {show_label} info={undefined}>{label}</BlockTitle>
-
-		<input
-			data-testid="textbox"
-			type="text"
-			class="scroll-hide"
-			bind:value
-			bind:this={el}
-			{placeholder}
-			disabled={!interactive}
-			dir={rtl ? "rtl" : "ltr"}
-			on:keypress={handle_keypress}
-		/>
-	</label>
-</Block>
+	</div>
+</div>
 
 <style>
 	label {
